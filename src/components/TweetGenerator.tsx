@@ -191,7 +191,7 @@ export default function TweetGenerator({
           {isGenerating ? (
             <>
               <div className="w-4 h-4 rounded-full border-2 border-black border-t-transparent animate-spin" />
-              <span>PROCESANDO ENUNCIADO...</span>
+              <span>CREANDO TWEET SOBERANO...</span>
             </>
           ) : (
             <>

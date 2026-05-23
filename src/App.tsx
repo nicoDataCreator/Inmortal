@@ -6,6 +6,8 @@ import TweetCard from "./components/TweetCard";
 import TweetGenerator from "./components/TweetGenerator";
 import TweetReplyTool from "./components/TweetReplyTool";
 import CarlosStats from "./components/CarlosStats";
+import AIDiagnostics from "./components/AIDiagnostics";
+import ElliottWaveScanner from "./components/ElliottWaveScanner";
 
 // Inmortalized static starting tweets representing actual Maslatón quotes
 const INITIAL_TWEETS: Tweet[] = [
@@ -201,6 +203,20 @@ export default function App() {
     }
   };
 
+  // Push the visual wave scanner result as a live, formatted Tweet post in Carlos' feed
+  const handleScanComplete = (tweetText: string, chartImage: string) => {
+    const newTweet: Tweet = {
+      id: `wave_scan_${Date.now()}`,
+      category: TweetCategory.ELLIOT_WAVES,
+      text: tweetText,
+      timestamp: "Ahora mismo",
+      likes: Math.floor(Math.random() * 850) + 120,
+      retweets: Math.floor(Math.random() * 415) + 60,
+      chartImage: chartImage,
+    };
+    setTweets((prev) => [newTweet, ...prev]);
+  };
+
   return (
     <div className={`min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-300 ${isDarkMode ? "dark" : ""}`}>
       {/* Unified Header */}
@@ -237,6 +253,9 @@ export default function App() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Command panel */}
           <section className="lg:col-span-7 space-y-8">
+            {/* Real-time connection indicators & diagnostic logging panel */}
+            <AIDiagnostics />
+
             {/* Engine Config cockpit */}
             <TweetGenerator
               onTweetGenerated={handleGenerateTweet}
@@ -252,6 +271,9 @@ export default function App() {
               generatedReply={generatedReply}
               replySources={replySources}
             />
+
+            {/* Elliott Wave Multi-modal Scanner */}
+            <ElliottWaveScanner onScanComplete={handleScanComplete} />
 
             {/* Simulated Elliott wave Metrics */}
             <CarlosStats />

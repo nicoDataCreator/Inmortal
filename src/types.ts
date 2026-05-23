@@ -24,6 +24,7 @@ export interface Tweet {
     imageUrl?: string;
     explanation?: string;
   };
+  chartImage?: string; // Optional client-uploaded base64 string for Elliott Wave chart screenshots
 }
 
 export interface MarketAsset {

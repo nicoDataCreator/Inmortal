@@ -192,7 +192,7 @@ export default function TweetReplyTool({
           {isReplying ? (
             <>
               <div className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-              <span>{activeTab === "link" ? "BUSCANDO EN X Y COORDINANDO..." : "ELABORANDO RESPUESTA..."}</span>
+              <span>{activeTab === "link" ? "CREANDO BÚSQUEDA Y COORDINANDO..." : "CREANDO RÉPLICA DE INMEDIATO..."}</span>
             </>
           ) : (
             <>

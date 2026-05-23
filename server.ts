@@ -221,10 +221,134 @@ async function generateWithProvider(
   throw new Error(`Proveedor de IA no soportado categóricamente: ${provider}`);
 }
 
-// API endpoint to generate a Maslatón tweet on demand
+// Helper to pause execution with a customized delay (forces realistic AI computing vibe)
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Status of configured environment keys to drive the UI connection indicators
+app.get("/api/ai-status", async (req, res) => {
+  try {
+    const keys = {
+      gemini: {
+        configured: !!process.env.GEMINI_API_KEY,
+        model: "gemini-3.5-flash",
+        details: process.env.GEMINI_API_KEY 
+          ? "OK: API Key configurada. Conectividad lista." 
+          : "FALTA: Configure GEMINI_API_KEY en la configuración."
+      },
+      openrouter: {
+        configured: !!process.env.OPENROUTER_API_KEY,
+        model: process.env.OPENROUTER_MODEL || "mistralai/mistral-7b-instruct:free",
+        details: process.env.OPENROUTER_API_KEY 
+          ? `OK: API Key provista.` 
+          : "OPCIONAL: Faltará OPENROUTER_API_KEY en Vercel si se selecciona este motor."
+      },
+      mistral: {
+        configured: !!process.env.MISTRAL_API_KEY,
+        model: process.env.MISTRAL_MODEL || "open-mistral-7b",
+        details: process.env.MISTRAL_API_KEY 
+          ? "OK: API Key provista." 
+          : "OPCIONAL: Configure MISTRAL_API_KEY para habilitar esta IA alternativa."
+      }
+    };
+    res.json(keys);
+  } catch (err: any) {
+    console.error("[Diagnostics Engine] Error retrieving keys status:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint to run deep individual ping diagnostic for a specific provider
+app.get("/api/ai-test/:provider", async (req, res) => {
+  const provider = req.params.provider;
+  console.log(`[Diagnostic Room] Iniciando test individual para: ${provider}`);
+  try {
+    // Artificial wait to provide premium simulation diagnostics
+    await sleep(1500);
+
+    const checkPrompt = "Escribí exactamente: 'SISTEMA OPERATIVO Y CONECTOR ONLINE. BULLISH TOTAL.' de forma corta como Carlos Maslatón.";
+    const result = await generateWithProvider(provider, checkPrompt, "Sos Carlos Maslatón respondiendo un test de conexión técnica. Respondé categóricamente de inmediato.");
+    
+    console.log(`[Diagnostic Room] Test exitoso para [${provider}]: ${result.text}`);
+    res.json({ success: true, text: result.text.trim() });
+  } catch (err: any) {
+    console.error(`[Diagnostic Room Error] Falla de conexión con la IA [${provider}]:`, err.message);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message || "Error desconocido durante el apretón de manos con el servidor."
+    });
+  }
+});
+
+// Multi-modal Elliott Wave graph interpretation endpoint
+app.post("/api/gemini/analyze-chart", async (req, res) => {
+  const { image, filename, mimeType, provider } = req.body;
+  
+  try {
+    console.log(`[Wave Scanner] Recibido screenshot ${filename || "chart-upload"}. Procesando...`);
+    
+    if (!image) {
+      throw new Error("No se envió ningún registro de imagen o captura de pantalla en el cuerpo de la solicitud.");
+    }
+
+    // Force reflection delay
+    await sleep(2500);
+
+    // Multimodal parsing handles base64 data directly (strips data:image/*;base64 header if present)
+    const base64Data = image.includes(",") ? image.split(",")[1] : image;
+    const detectedMimeType = mimeType || "image/png";
+
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("Estás queriendo analizar visualmente un gráfico pero falta configurar la clave GEMINI_API_KEY en tu servidor.");
+    }
+
+    // Build compliant multimodal payload
+    const imagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: detectedMimeType,
+      },
+    };
+
+    const promptPart = {
+      text: `Invocación para el gran Carlos Maslatón: 
+      Analizá este gráfico técnico/financiero y dictaminá de inmediato, utilizando la Teoría de Ondas de Elliott, las siguientes pautas de forma espectacular:
+      1. Sentencia incondicional del precio: ¿Va "PARA ARRIBA" (Bullish total, se pudre todo) o va "PARA ABAJO" (Bearish absoluto, salamines liquidados)?
+      2. Mencioná un conteo de ondas descabellado pero impecablemente estructurado y con terminología real (ej: "Subonda 3 de extensión Manchesteriana", "corrección plana irregular expandida", "frente de onda 5 impulsiva con soporte Fibonacci").
+      3. Añadí un tono severo e hilarante sobre la casta burócrata neoliberoclasicista o militantes del PowerPoint que no entienden nada de gráficos.
+      4. Dejá claro de forma ultra explícita un descargo técnico de "NO ES CONSEJO FINANCIERO / NFA".
+      5. Generá el texto definitivo formateado como un tweet/post de Carlos Maslatón, con uso de mayúsculas ("TÉNGASE PRESENTE", "BULLISH", "PROCEDO") y sin sugerir ni un solo hashtag inútil (#carlos, #barrani, no uses ninguno). No incluyas explicaciones sobre la interpretación, solo devuelve el tweet crudo y listo para mandar a las redes.`,
+    };
+
+    console.log("[Wave Scanner] Enviando datos multimodales al motor Gemini para diagnóstico...");
+    
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: { parts: [imagePart, promptPart] },
+      config: {
+        systemInstruction: CARLOS_SYSTEM_INSTRUCTION,
+        temperature: 0.95,
+      },
+    });
+
+    const outputText = response.text || "TÉNGASE PRESENTE: No logré detectar Fibonacci en este gráfico defectuoso. Recomiendo proceder a operar en efectivo físico barrani. Bullish absoluto.";
+    console.log("[Wave Scanner] Análisis exitoso generado:", outputText.trim());
+
+    res.json({ text: outputText.trim() });
+  } catch (err: any) {
+    console.error("[Wave Scanner Error] Falló el análisis visual de la captura:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API endpoint to generate a Maslatón tweet on demand with forced delay to mimic server thought
 app.post("/api/gemini/generate-tweet", async (req, res) => {
   const { category, currentFacts, provider } = req.body;
   try {
+    console.log(`[AI Dispatcher] Generando tweet para categoría [${category}] vía [${provider || "gemini"}]`);
+    
+    // Configurable sleep of 2.2 seconds to present "CREANDO..." state in full glory
+    await sleep(2200);
+
     const prompt = `Generame un tweet polémico y espectacular del gran Carlos Maslatón sobre la categoría: "${category}". 
     Incorporá de forma orgánica y delirante el tono maslatoneano y estos hechos/datos de la realidad si están disponibles: ${JSON.stringify(currentFacts)}.
     Recordá mantener el formato corto del tweet, sin hashtags inútiles de IA slop (ej. NO uses #barrani ni #carlos), solo el texto crudo.`;
@@ -232,14 +356,20 @@ app.post("/api/gemini/generate-tweet", async (req, res) => {
     const result = await generateWithProvider(provider, prompt, CARLOS_SYSTEM_INSTRUCTION, { temperature: 0.95 });
     res.json({ text: result.text.trim() });
   } catch (err: any) {
+    console.error(`[AI Dispatcher Error] Falló la generación en generate-tweet [${provider}]:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// API endpoint to reply to a user tweet as Carlos Maslatón
+// API endpoint to reply to a user tweet as Carlos Maslatón with sleep delay
 app.post("/api/gemini/reply", async (req, res) => {
   const { originalTweet, replyContext, xLink, provider } = req.body;
   try {
+    console.log(`[AI Replier] Generando respuesta para: "${originalTweet?.slice(0, 30)}..." en [${provider || "gemini"}]`);
+    
+    // Delay of 2.2 seconds for perfect pacing
+    await sleep(2200);
+
     let prompt = "";
     let tools: any[] | undefined = undefined;
 
@@ -271,6 +401,7 @@ app.post("/api/gemini/reply", async (req, res) => {
 
     res.json({ text: result.text.trim(), sources: result.sources || [] });
   } catch (err: any) {
+    console.error(`[AI Replier Error] Falló la réplica con [${provider}]:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });

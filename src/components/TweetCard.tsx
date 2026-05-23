@@ -106,6 +106,21 @@ export default function TweetCard({ tweet, onRetweet, onLike }: TweetCardProps) 
             &quot;{tweet.text}&quot;
           </div>
 
+          {/* Embedded Chart Screenshot if uploaded */}
+          {tweet.chartImage && (
+            <div className="mt-4 rounded-lg overflow-hidden border border-zinc-200 dark:border-white/10 relative max-h-72 bg-zinc-50 dark:bg-black/45">
+              <img
+                src={tweet.chartImage}
+                alt="Diagrama de Ondas de Elliot Escaneado"
+                className="w-full h-auto max-h-72 object-contain mx-auto p-1"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute top-2 left-2 bg-[#0A0A0C]/90 text-white font-mono text-[9px] px-2 py-0.5 rounded border border-[#C5A267]/30 uppercase tracking-widest">
+                DIAGRAMA DE ONDAS SOBERANO
+              </div>
+            </div>
+          )}
+
           {/* Embedded Real-time Market Status if linked */}
           {tweet.marketData && (
             <div className="mt-4 p-4 rounded bg-zinc-50 dark:bg-white/5 border border-zinc-200/60 dark:border-white/5">
