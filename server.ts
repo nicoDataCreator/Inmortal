@@ -2,6 +2,12 @@ import express from "express";
 import path from "path";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import { 
+  getKnowledgeList, 
+  addKnowledgeEntry, 
+  deleteKnowledgeEntry, 
+  getDbSetupSql 
+} from "./server/knowledge";
 
 dotenv.config();
 
@@ -96,6 +102,43 @@ app.get("/api/space-status", async (req, res) => {
       explanation: "El planeta rojo se encuentra en un punto crítico de su órbita celeste. Advertimos a toda la comunidad financiera que la inminente retrogradación de Marte sobre los planos astrales tendrá efectos devastadores sobre las posiciones del BTC y los comodines tradicionales de cotización estadounidense."
     });
   }
+});
+
+// Carlos's Book Knowledge endpoints
+app.get("/api/knowledge", async (req, res) => {
+  try {
+    const list = await getKnowledgeList();
+    res.json(list);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/knowledge", async (req, res) => {
+  const { category, concept, quote_or_fact, historical_context } = req.body;
+  try {
+    if (!category || !concept || !quote_or_fact) {
+      return res.status(400).json({ error: "Faltan parámetros requeridos (category, concept, quote_or_fact)" });
+    }
+    const result = await addKnowledgeEntry({ category, concept, quote_or_fact, historical_context });
+    res.status(201).json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/knowledge/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const ok = await deleteKnowledgeEntry(id);
+    res.json({ success: ok });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/knowledge/sql", (req, res) => {
+  res.json({ sql: getDbSetupSql() });
 });
 
 // Carlos Maslatón AI Engine Prompt System
@@ -348,9 +391,25 @@ app.post("/api/gemini/generate-tweet", async (req, res) => {
     // Configurable sleep of 2.2 seconds to present "CREANDO..." state in full glory
     await sleep(2200);
 
-    const prompt = `Generame un tweet polémico y espectacular del gran Carlos Maslatón sobre la categoría: "${category}". 
-    Incorporá de forma orgánica y delirante el tono maslatoneano y estos hechos/datos de la realidad si están disponibles: ${JSON.stringify(currentFacts)}.
-    Recordá mantener el formato corto del tweet, sin hashtags inútiles de IA slop (ej. NO uses #barrani ni #carlos), solo el texto crudo.`;
+    // Retrieve knowledge entries from the Supabase/local database!
+    const allKnowledge = await getKnowledgeList();
+    // Filter knowledge by category matching
+    const matchingEntries = allKnowledge.filter(item => 
+      item.category.toLowerCase().includes(category?.toLowerCase()) ||
+      category?.toLowerCase().includes(item.category.toLowerCase())
+    );
+
+    // Grab up to 3 context pieces
+    const contextItems = matchingEntries.length > 0 ? matchingEntries.slice(0, 3) : allKnowledge.slice(0, 3);
+    const databaseKnowledgeString = contextItems.map(item => `- [Hito Doctrinario del Libro] Concepto: ${item.concept} | Cita Textual: "${item.quote_or_fact}"`).join("\n");
+
+    const prompt = `Generame un tweet polémico, de gran alcurnia y espectacular de Carlos Maslatón sobre la categoría: "${category}". 
+    
+    Toma en consideración e inspirate fuertemente en este fragmento de doctrina real extraído de su libro oficial y base de datos:
+    ${databaseKnowledgeString}
+
+    Incorporá de forma orgánica el tono maslatoneano y estos hechos/datos de la realidad si están disponibles: ${JSON.stringify(currentFacts)}.
+    Mantené siempre el formato corto e icónico del tweet, con uso imperativo de mayúsculas ("TÉNGASE PRESENTE", "BULLISH", "BARRANI", "PROCEDO") y sin incluir hashtags inútiles de IA slop de ningún tipo. Retorná únicamente el texto crudo del tweet listo para publicar.`;
 
     const result = await generateWithProvider(provider, prompt, CARLOS_SYSTEM_INSTRUCTION, { temperature: 0.95 });
     res.json({ text: result.text.trim() });
@@ -369,6 +428,11 @@ app.post("/api/gemini/reply", async (req, res) => {
     // Delay of 2.2 seconds for perfect pacing
     await sleep(2200);
 
+    // Retrieve random knowledge entry from the database to inject as background nuance
+    const allKnowledge = await getKnowledgeList();
+    const randomEntry = allKnowledge[Math.floor(Math.random() * allKnowledge.length)];
+    const doctrineNuance = randomEntry ? `Inspirate de fondo en la máxima de Carlos: "${randomEntry.concept}" - "${randomEntry.quote_or_fact}".` : "";
+
     let prompt = "";
     let tools: any[] | undefined = undefined;
 
@@ -379,6 +443,7 @@ app.post("/api/gemini/reply", async (req, res) => {
       prompt = `El usuario copió este enlace de un post de X (Twitter): "${xLink}".
       Usa tu herramienta de búsqueda integrada (Google Search) para buscar sobre este tuit específico, quién lo escribió y el tema del que trata si es de actualidad, o responde analizando el contenido que alcances a recolectar de este enlace.
       Escribí una respuesta asertiva, espectacular y con el estilo inconfundible de Carlos Maslatón.
+      ${doctrineNuance}
       Objetivo o alineación deseada de la réplica: "${replyContext || "oponerse ferozmente con análisis técnico"}."
       Tu respuesta debe ser un tuit de respuesta directo y contundente, listo para ser posteado. No incluyas explicaciones sobre la búsqueda, solo el texto crudo del tuit maslatoneano. Sin hashtags inútiles de IA slop (ej. NO uses #carlos).`;
       if (isGemini) {
@@ -388,9 +453,10 @@ app.post("/api/gemini/reply", async (req, res) => {
       prompt = `A Carlos Maslatón le acaban de enviar el siguiente tweet o comentario de un tercero:
       "${originalTweet}"
       
-      Escribí una respuesta asertiva, espectacular y de respaldo absoluto o crítica profunda según tu tono. 
+      Escribí una respuesta asertiva, espectacular y de respaldo absoluto o crítica profunda según tu tono de Carlos. 
+      ${doctrineNuance}
       Contexto o dirección del usuario: "${replyContext || "oponerse ferozmente con análisis técnico"}".
-      Recordá denunciar la 'conducta ho-rro-ro-sa' o celebrar la iniciativa 100% barrani según corresponda.`;
+      Recordá denunciar la 'conducta ho-rro-ro-sa' o celebrar la iniciativa 100% barrani según corresponda. Retorná de forma directa el tweet de respuesta listo sin introducciones de ningún tipo.`;
     }
 
     const result = await generateWithProvider(provider, prompt, CARLOS_SYSTEM_INSTRUCTION, {

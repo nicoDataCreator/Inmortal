@@ -9,6 +9,7 @@ import TweetReplyTool from "./components/TweetReplyTool";
 import CarlosStats from "./components/CarlosStats";
 import AIDiagnostics from "./components/AIDiagnostics";
 import ElliottWaveScanner from "./components/ElliottWaveScanner";
+import CarlosBookLibrary from "./components/CarlosBookLibrary";
 
 // Inmortalized static starting tweets representing actual Maslatón quotes
 const INITIAL_TWEETS: Tweet[] = [
@@ -336,6 +337,9 @@ export default function App() {
 
             {/* Elliott Wave Multi-modal Scanner */}
             <ElliottWaveScanner onScanComplete={handleScanComplete} />
+
+            {/* Carlos Book Knowledge Database Library */}
+            <CarlosBookLibrary />
 
             {/* Simulated Elliott wave Metrics */}
             <CarlosStats />
