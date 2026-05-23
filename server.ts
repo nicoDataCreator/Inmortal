@@ -166,8 +166,8 @@ async function generateWithProvider(
 ): Promise<{ text: string, sources?: { title: string, uri: string }[] }> {
   const selectedProvider = (provider || "gemini").toLowerCase();
 
-  // 1. GEMINI PROVIDER
-  if (selectedProvider === "gemini") {
+  // 1. GEMINI PROVIDER (Standard Default Engine)
+  const runGemini = async () => {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("TÉNGASE PRESENTE: La clave GEMINI_API_KEY no está configurada en Vercel o el entorno local.");
     }
@@ -188,76 +188,101 @@ async function generateWithProvider(
     })) || [];
 
     return { text, sources };
+  };
+
+  if (selectedProvider === "gemini") {
+    return await runGemini();
   }
 
   // 2. OPENROUTER PROVIDER (Soporte Mistral y otros modelos gratis)
   if (selectedProvider === "openrouter") {
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
-      throw new Error("TÉNGASE PRESENTE: La clave OPENROUTER_API_KEY no está provista en las variables de entorno de Vercel.");
+    try {
+      const apiKey = process.env.OPENROUTER_API_KEY;
+      if (!apiKey) {
+        throw new Error("La clave OPENROUTER_API_KEY no está configurada. Operación derivada a Gemini.");
+      }
+      
+      // Sanitizar modelos defectuosos como "default" provenientes de variables mal cargadas
+      let model = process.env.OPENROUTER_MODEL || "mistralai/mistral-7b-instruct:free";
+      if (!model || model.trim() === "" || model.toLowerCase() === "default") {
+        model = "mistralai/mistral-7b-instruct:free";
+      }
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": "https://maslaton-app.vercel.app",
+          "X-Title": "Masla Town Simulator",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: prompt }
+          ],
+          temperature: options.temperature ?? 0.9,
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`OpenRouter falló (${response.status}): ${errorText}`);
+      }
+
+      const data: any = await response.json();
+      const text = data.choices?.[0]?.message?.content || "";
+      return { text, sources: [] };
+    } catch (err: any) {
+      console.warn(`[OpenRouter Fallback Alert] ${err.message}. Derivando procedimiento soberano a Gemini de inmediato.`);
+      // Sifón helado y bife de lomo: procedemos con el predeterminado
+      return await runGemini();
     }
-    const model = process.env.OPENROUTER_MODEL || "mistralai/mistral-7b-instruct:free";
-
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-        "HTTP-Referer": "https://maslaton-app.vercel.app",
-        "X-Title": "Masla Town Simulator",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: prompt }
-        ],
-        temperature: options.temperature ?? 0.9,
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`OpenRouter API falló con código ${response.status}: ${errorText}`);
-    }
-
-    const data: any = await response.json();
-    const text = data.choices?.[0]?.message?.content || "";
-    return { text, sources: [] };
   }
 
   // 3. MISTRAL AI PROVIDER
   if (selectedProvider === "mistral") {
-    const apiKey = process.env.MISTRAL_API_KEY;
-    if (!apiKey) {
-      throw new Error("TÉNGASE PRESENTE: La clave MISTRAL_API_KEY no está configurada en las variables de Vercel.");
+    try {
+      const apiKey = process.env.MISTRAL_API_KEY;
+      if (!apiKey) {
+        throw new Error("La clave MISTRAL_API_KEY no está configurada. Operación derivada a Gemini.");
+      }
+      
+      // Sanitizar modelos defectuosos como "Studio" o "default" provenientes de configuraciones erróneas
+      let model = process.env.MISTRAL_MODEL || "open-mistral-7b";
+      if (!model || model.trim() === "" || model.toLowerCase() === "studio" || model.toLowerCase() === "default") {
+        model = "open-mistral-7b";
+      }
+
+      const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: prompt }
+          ],
+          temperature: options.temperature ?? 0.9,
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Mistral falló (${response.status}): ${errorText}`);
+      }
+
+      const data: any = await response.json();
+      const text = data.choices?.[0]?.message?.content || "";
+      return { text, sources: [] };
+    } catch (err: any) {
+      console.warn(`[Mistral Fallback Alert] ${err.message}. Derivando procedimiento soberano a Gemini de de inmediato.`);
+      return await runGemini();
     }
-    const model = process.env.MISTRAL_MODEL || "open-mistral-7b";
-
-    const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: prompt }
-        ],
-        temperature: options.temperature ?? 0.9,
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Mistral AI API falló con código ${response.status}: ${errorText}`);
-    }
-
-    const data: any = await response.json();
-    const text = data.choices?.[0]?.message?.content || "";
-    return { text, sources: [] };
   }
 
   throw new Error(`Proveedor de IA no soportado categóricamente: ${provider}`);
