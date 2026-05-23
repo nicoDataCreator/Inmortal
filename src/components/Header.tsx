@@ -7,8 +7,7 @@ interface HeaderProps {
   marketAssets: MarketAsset[];
   isMarketLoading: boolean;
   onRefreshMarket: () => void;
-  selectedAIProvider: "gemini" | "openrouter" | "mistral";
-  onProviderChange: (provider: "gemini" | "openrouter" | "mistral") => void;
+  onShowIntroClick: () => void;
 }
 
 export default function Header({
@@ -17,8 +16,7 @@ export default function Header({
   marketAssets,
   isMarketLoading,
   onRefreshMarket,
-  selectedAIProvider,
-  onProviderChange,
+  onShowIntroClick,
 }: HeaderProps) {
   return (
     <header className="border-b border-zinc-200 dark:border-white/10 bg-white/80 dark:bg-[#0A0A0C]/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
@@ -83,21 +81,25 @@ export default function Header({
 
         {/* Global Controls */}
         <div className="flex items-center gap-3">
-          {/* Engine Selector */}
-          <div className="flex items-center gap-1.5 bg-zinc-50 dark:bg-zinc-900 px-2.5 py-1 rounded border border-zinc-200 dark:border-white/10 hover:border-[#C5A267] transition-all">
+          {/* Static Engine Status */}
+          <div className="flex items-center gap-1.5 bg-zinc-50 dark:bg-zinc-900 px-2.5 py-1.5 rounded border border-zinc-200 dark:border-white/10 select-none">
             <span className="text-[9px] font-mono font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-              MOTOR IA:
+              MOTOR SOBERANO:
             </span>
-            <select
-              value={selectedAIProvider}
-              onChange={(e) => onProviderChange(e.target.value as any)}
-              className="text-xs font-mono font-extrabold bg-transparent text-zinc-900 dark:text-[#C5A267] focus:outline-none border-none cursor-pointer pr-1"
-            >
-              <option value="gemini" className="bg-white dark:bg-[#0A0A0C]">Gemini 3.5</option>
-              <option value="openrouter" className="bg-white dark:bg-[#0A0A0C]">OpenRouter</option>
-              <option value="mistral" className="bg-white dark:bg-[#0A0A0C]">Mistral AI</option>
-            </select>
+            <span className="text-xs font-mono font-extrabold text-[#C5A267] flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+              GEMINI 3.5
+            </span>
           </div>
+
+          {/* Info Modal Trigger */}
+          <button
+            onClick={onShowIntroClick}
+            className="text-xs font-mono font-bold uppercase tracking-wider border border-[#C5A267]/40 hover:bg-[#C5A267]/10 text-[#C5A267] px-3 py-1.5 rounded transition-all cursor-pointer flex items-center gap-1"
+            title="Ver introducción conceptual"
+          >
+            <span>CONCEPTO</span>
+          </button>
 
           {/* Light/Dark Toggle */}
           <button

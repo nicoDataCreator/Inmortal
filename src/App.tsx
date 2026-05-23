@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Tweet, TweetCategory, MarketAsset } from "./types";
 import { MessageCircle, FileText, Send, Sparkles, RefreshCcw, HelpCircle, Check, Info } from "lucide-react";
 import Header from "./components/Header";
@@ -45,9 +46,9 @@ const INITIAL_TWEETS: Tweet[] = [
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [selectedAIProvider, setSelectedAIProvider] = useState<"gemini" | "openrouter" | "mistral">(
-    () => (localStorage.getItem("selectedAIProvider") as "gemini" | "openrouter" | "mistral") || "gemini"
-  );
+  const [showIntro, setShowIntro] = useState<boolean>(() => {
+    return localStorage.getItem("masla_intro_seen") !== "true";
+  });
   const [marketAssets, setMarketAssets] = useState<MarketAsset[]>([
     { symbol: "BTC", name: "Bitcoin", price: 64500, change: 1.25 },
     { symbol: "COMP", name: "NASDAQ", price: 16340, change: -0.45 },
@@ -73,10 +74,14 @@ export default function App() {
     }
   }, [isDarkMode]);
 
-  // Persist selected AI provider
-  useEffect(() => {
-    localStorage.setItem("selectedAIProvider", selectedAIProvider);
-  }, [selectedAIProvider]);
+  const handleDismissIntro = () => {
+    localStorage.setItem("masla_intro_seen", "true");
+    setShowIntro(false);
+  };
+
+  const handleShowIntro = () => {
+    setShowIntro(true);
+  };
 
   // Fetch API assets & NASA details on startup
   useEffect(() => {
@@ -128,7 +133,7 @@ export default function App() {
         body: JSON.stringify({
           category,
           currentFacts: parsedFacts,
-          provider: selectedAIProvider,
+          provider: "gemini",
         }),
       });
 
@@ -186,7 +191,7 @@ export default function App() {
       const response = await fetch("/api/gemini/reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ originalTweet, replyContext, xLink, provider: selectedAIProvider }),
+        body: JSON.stringify({ originalTweet, replyContext, xLink, provider: "gemini" }),
       });
 
       if (!response.ok) throw new Error("Gemini reply error");
@@ -226,9 +231,66 @@ export default function App() {
         marketAssets={marketAssets}
         isMarketLoading={isMarketLoading}
         onRefreshMarket={fetchMarketData}
-        selectedAIProvider={selectedAIProvider}
-        onProviderChange={setSelectedAIProvider}
+        onShowIntroClick={handleShowIntro}
       />
+
+      {/* Premium First-Visit / Instruction Presentation Overlay (AnimatePresence) */}
+      <AnimatePresence>
+        {showIntro && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="bg-white dark:bg-[#0A0A0C] border-2 border-[#C5A267] rounded-lg max-w-xl w-full p-8 shadow-[0_0_50px_rgba(197,162,103,0.2)] font-sans relative overflow-hidden"
+            >
+              {/* Decorative design element */}
+              <div className="absolute top-0 left-0 w-2 h-full bg-[#C5A267]" />
+              
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded bg-[#C5A267] flex items-center justify-center font-serif font-bold text-black text-lg">
+                  C
+                </div>
+                <div>
+                  <h4 className="font-serif font-bold text-lg text-zinc-950 dark:text-white tracking-tight">
+                    SINOPSIS DEL PROCEDIMIENTO SOBERANO
+                  </h4>
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-[#C5A267]">
+                    Cuerpo Documental Maslatoneano
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-zinc-750 dark:text-zinc-300 text-xs leading-relaxed font-serif">
+                <p className="text-sm italic">
+                  &quot;Hemos recopilado minuciosamente una gran cantidad de información histórica, sentencias doctrinales del mercado, discursos, tweets y vivencias gastronómicas sibaritas de Carlos Maslatón.&quot;
+                </p>
+                <p className="font-sans text-[11px] text-zinc-500 dark:text-zinc-400">
+                  A partir de esta vasta base documental consolidada, el motor inteligente soberano simula con precisión total los razonamientos financieros (Teoría de Ondas de Elliott), el fervor anti-comunista, la apología al barrani y la defensa inquebrantable del lomo premium en Costanera Norte.
+                </p>
+                <div className="p-3 bg-amber-500/5 dark:bg-[#C5A267]/5 border-l-2 border-[#C5A267] rounded font-mono text-[10px] text-zinc-600 dark:text-[#C5A267] leading-relaxed">
+                  <strong>Estado del Conector:</strong> 100% SOBERANO Y BARRANI · Default Gemini 3.5 Engine activo para todas las operaciones analíticas.
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-zinc-200 dark:border-white/5 flex justify-end">
+                <button
+                  onClick={handleDismissIntro}
+                  className="bg-[#C5A267] hover:bg-[#B38E54] active:bg-[#9E7C45] text-black font-mono font-bold uppercase tracking-widest text-xs px-6 py-3 rounded transition-all shadow-md shadow-[#C5A267]/10 w-full sm:w-auto"
+                >
+                  ENTENDIDO, PROCEDEMOS
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Container */}
       <main className="w-full max-w-7xl mx-auto px-4 py-8">
