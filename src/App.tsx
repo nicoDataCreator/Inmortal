@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Tweet, TweetCategory, MarketAsset } from "./types";
-import { MessageCircle, FileText, Send, Sparkles, RefreshCcw, HelpCircle, Check, Info } from "lucide-react";
+import { MessageCircle, FileText, Send, Sparkles, RefreshCcw, HelpCircle, Check, Info, X } from "lucide-react";
 import Header from "./components/Header";
 import TweetCard from "./components/TweetCard";
 import TweetGenerator from "./components/TweetGenerator";
@@ -50,6 +50,9 @@ export default function App() {
   const [showIntro, setShowIntro] = useState<boolean>(() => {
     return localStorage.getItem("masla_intro_seen") !== "true";
   });
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState<boolean>(() => {
+    return localStorage.getItem("masla_welcome_dismissed") !== "true";
+  });
   const [marketAssets, setMarketAssets] = useState<MarketAsset[]>([
     { symbol: "BTC", name: "Bitcoin", price: 64500, change: 1.25 },
     { symbol: "COMP", name: "NASDAQ", price: 16340, change: -0.45 },
@@ -78,6 +81,11 @@ export default function App() {
   const handleDismissIntro = () => {
     localStorage.setItem("masla_intro_seen", "true");
     setShowIntro(false);
+  };
+
+  const handleDismissWelcome = () => {
+    localStorage.setItem("masla_welcome_dismissed", "true");
+    setShowWelcomeBanner(false);
   };
 
   const handleShowIntro = () => {
@@ -296,21 +304,33 @@ export default function App() {
       {/* Main Container */}
       <main className="w-full max-w-7xl mx-auto px-4 py-8">
         {/* Welcome Section */}
-        <div className="mb-8 p-6 bg-red-600 rounded-3xl text-white relative overflow-hidden shadow-xl shadow-red-600/10">
-          <div className="absolute right-0 bottom-0 w-80 h-80 bg-red-500 rounded-full filter blur-2xl opacity-40 translate-x-20 translate-y-20 pointer-events-none" />
-          <div className="relative z-10 max-w-2xl">
-            <h2 className="text-2xl font-extrabold tracking-tight">
-              Bienvenido a INMORTAL
-            </h2>
-            <p className="mt-2 text-sm text-red-100 leading-relaxed">
-              El simulador definitivo e interactivo basado en la filosofía, análisis de mercado y vivencias de <strong>Carlos Maslatón</strong>. Generá tweets asombrosos con datos reales del BTC y de la NASA, o respondé tweets ajenos con el criterio inapelable del maestro.
-            </p>
-            <div className="mt-4 flex gap-1 items-center bg-red-700/55 p-2 rounded-lg w-fit text-[11px] font-mono border border-white/10 uppercase tracking-widest text-red-200">
-              <Info size={13} />
-              <span>Conexión Servidor Activa · 100% Barrani</span>
+        {showWelcomeBanner && (
+          <div className="mb-8 p-6 bg-red-950/80 dark:bg-red-950/30 text-red-100 border border-red-800/40 dark:border-red-900/30 rounded-3xl relative overflow-hidden shadow-lg shadow-red-950/20 transition-all duration-300">
+            <div className="absolute right-0 bottom-0 w-80 h-80 bg-red-900/20 rounded-full filter blur-3xl opacity-40 translate-x-20 translate-y-20 pointer-events-none" />
+            
+            {/* Dismiss Button */}
+            <button
+              onClick={handleDismissWelcome}
+              className="absolute right-4 top-4 text-red-300/80 hover:text-white hover:bg-white/10 p-1.5 rounded-full transition-all cursor-pointer z-20"
+              title="Sacar banner de bienvenida"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="relative z-10 max-w-2xl pr-8">
+              <h2 className="text-xl font-bold tracking-tight text-red-200 dark:text-red-100 font-serif">
+                Bienvenido a INMORTAL
+              </h2>
+              <p className="mt-2 text-xs sm:text-sm text-red-200/80 dark:text-zinc-300 leading-relaxed font-sans">
+                El simulador definitivo e interactivo basado en la filosofía, análisis de mercado y vivencias de <strong>Carlos Maslatón</strong>. Generá tweets asombrosos con datos reales del BTC y de la NASA, o respondé tweets ajenos con el criterio inapelable del maestro.
+              </p>
+              <div className="mt-4 flex gap-1.5 items-center bg-red-900/40 dark:bg-red-950/50 border border-red-800/50 p-2 rounded-lg w-fit text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-red-300">
+                <Info size={13} />
+                <span>Conexión Servidor Activa · 100% Barrani</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Dashboard Grid split view */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
