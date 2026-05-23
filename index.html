@@ -4,6 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inmortal - El Mundo según Carlos Maslatón</title>
+    <script>
+      // Safeguard for un-writable window.fetch inside sandbox/iframe/browser extensions/metrics scripts
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          var customFetch = originalFetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function() {
+              return customFetch || originalFetch;
+            },
+            set: function(val) {
+              customFetch = val;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          console.warn("[Fetch Safeguard] Failed to redefine window.fetch:", e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
