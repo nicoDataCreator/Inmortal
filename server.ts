@@ -16,15 +16,18 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// Initialize Gemini Client with compliant telemetry agent
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+// Initialize Gemini Client lazily to prevent startup/module-load crashes on platforms like Vercel
+function getAi(): GoogleGenAI {
+  const apiKey = process.env.GEMINI_API_KEY || "dummy-key-to-prevent-startup-crash-on-vercel";
+  return new GoogleGenAI({
+    apiKey,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
     }
-  }
-});
+  });
+}
 
 // Fallback high-utility API keys for Finnhub and NASA from user parameters
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY || "d88rg5pr01qs9ff5socgd88rg5pr01qs9ff5sod0";
@@ -200,7 +203,7 @@ async function generateWithProvider(
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("TÉNGASE PRESENTE: La clave GEMINI_API_KEY no está configurada en Vercel o el entorno local.");
     }
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
       model: "gemini-3.5-flash",
       contents: prompt,
       config: {
@@ -504,7 +507,7 @@ app.post("/api/gemini/analyze-chart", async (req, res) => {
 
     console.log("[Wave Scanner] Enviando datos multimodales al motor Gemini para diagnóstico...");
     
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
       model: "gemini-3.5-flash",
       contents: { parts: [imagePart, promptPart] },
       config: {
@@ -646,4 +649,6 @@ async function startServer() {
   }
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
