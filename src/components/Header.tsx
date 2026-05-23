@@ -7,6 +7,8 @@ interface HeaderProps {
   marketAssets: MarketAsset[];
   isMarketLoading: boolean;
   onRefreshMarket: () => void;
+  selectedAIProvider: "gemini" | "openrouter" | "mistral";
+  onProviderChange: (provider: "gemini" | "openrouter" | "mistral") => void;
 }
 
 export default function Header({
@@ -15,6 +17,8 @@ export default function Header({
   marketAssets,
   isMarketLoading,
   onRefreshMarket,
+  selectedAIProvider,
+  onProviderChange,
 }: HeaderProps) {
   return (
     <header className="border-b border-zinc-200 dark:border-white/10 bg-white/80 dark:bg-[#0A0A0C]/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
@@ -78,11 +82,27 @@ export default function Header({
         </div>
 
         {/* Global Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Engine Selector */}
+          <div className="flex items-center gap-1.5 bg-zinc-50 dark:bg-zinc-900 px-2.5 py-1 rounded border border-zinc-200 dark:border-white/10 hover:border-[#C5A267] transition-all">
+            <span className="text-[9px] font-mono font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+              MOTOR IA:
+            </span>
+            <select
+              value={selectedAIProvider}
+              onChange={(e) => onProviderChange(e.target.value as any)}
+              className="text-xs font-mono font-extrabold bg-transparent text-zinc-900 dark:text-[#C5A267] focus:outline-none border-none cursor-pointer pr-1"
+            >
+              <option value="gemini" className="bg-white dark:bg-[#0A0A0C]">Gemini 3.5</option>
+              <option value="openrouter" className="bg-white dark:bg-[#0A0A0C]">OpenRouter</option>
+              <option value="mistral" className="bg-white dark:bg-[#0A0A0C]">Mistral AI</option>
+            </select>
+          </div>
+
           {/* Light/Dark Toggle */}
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="w-9 h-9 rounded flex items-center justify-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-650 dark:text-[#C5A267] transition-colors"
+            className="w-9 h-9 rounded flex items-center justify-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-650 dark:text-[#C5A267] transition-colors cursor-pointer"
             title={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
           >
             {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}

@@ -43,6 +43,9 @@ const INITIAL_TWEETS: Tweet[] = [
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [selectedAIProvider, setSelectedAIProvider] = useState<"gemini" | "openrouter" | "mistral">(
+    () => (localStorage.getItem("selectedAIProvider") as "gemini" | "openrouter" | "mistral") || "gemini"
+  );
   const [marketAssets, setMarketAssets] = useState<MarketAsset[]>([
     { symbol: "BTC", name: "Bitcoin", price: 64500, change: 1.25 },
     { symbol: "COMP", name: "NASDAQ", price: 16340, change: -0.45 },
@@ -67,6 +70,11 @@ export default function App() {
       root.classList.remove("dark");
     }
   }, [isDarkMode]);
+
+  // Persist selected AI provider
+  useEffect(() => {
+    localStorage.setItem("selectedAIProvider", selectedAIProvider);
+  }, [selectedAIProvider]);
 
   // Fetch API assets & NASA details on startup
   useEffect(() => {
@@ -118,6 +126,7 @@ export default function App() {
         body: JSON.stringify({
           category,
           currentFacts: parsedFacts,
+          provider: selectedAIProvider,
         }),
       });
 
@@ -175,7 +184,7 @@ export default function App() {
       const response = await fetch("/api/gemini/reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ originalTweet, replyContext, xLink }),
+        body: JSON.stringify({ originalTweet, replyContext, xLink, provider: selectedAIProvider }),
       });
 
       if (!response.ok) throw new Error("Gemini reply error");
@@ -201,6 +210,8 @@ export default function App() {
         marketAssets={marketAssets}
         isMarketLoading={isMarketLoading}
         onRefreshMarket={fetchMarketData}
+        selectedAIProvider={selectedAIProvider}
+        onProviderChange={setSelectedAIProvider}
       />
 
       {/* Main Container */}

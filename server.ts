@@ -115,25 +115,122 @@ Tu tono preferido:
 - Tus tweets son cortos, contundentes, imitando el formato tradicional de Twitter. Usá mayúsculas para "TÉNGASE PRESENTE", "BULLISH", "BARRANI", "PROCEDO".
 `;
 
+// Custom robust dispatcher for multiple AI providers (Gemini, OpenRouter, Mistral)
+async function generateWithProvider(
+  provider: string,
+  prompt: string,
+  systemInstruction: string,
+  options: { temperature?: number, tools?: any[] } = {}
+): Promise<{ text: string, sources?: { title: string, uri: string }[] }> {
+  const selectedProvider = (provider || "gemini").toLowerCase();
+
+  // 1. GEMINI PROVIDER
+  if (selectedProvider === "gemini") {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("TÉNGASE PRESENTE: La clave GEMINI_API_KEY no está configurada en Vercel o el entorno local.");
+    }
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        systemInstruction: systemInstruction,
+        temperature: options.temperature ?? 0.9,
+        tools: options.tools,
+      },
+    });
+
+    const text = response.text || "";
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((chunk: any) => ({
+      title: chunk.web?.title || "Fuente de X",
+      uri: chunk.web?.uri || "",
+    })) || [];
+
+    return { text, sources };
+  }
+
+  // 2. OPENROUTER PROVIDER (Soporte Mistral y otros modelos gratis)
+  if (selectedProvider === "openrouter") {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      throw new Error("TÉNGASE PRESENTE: La clave OPENROUTER_API_KEY no está provista en las variables de entorno de Vercel.");
+    }
+    const model = process.env.OPENROUTER_MODEL || "mistralai/mistral-7b-instruct:free";
+
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://maslaton-app.vercel.app",
+        "X-Title": "Masla Town Simulator",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: prompt }
+        ],
+        temperature: options.temperature ?? 0.9,
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenRouter API falló con código ${response.status}: ${errorText}`);
+    }
+
+    const data: any = await response.json();
+    const text = data.choices?.[0]?.message?.content || "";
+    return { text, sources: [] };
+  }
+
+  // 3. MISTRAL AI PROVIDER
+  if (selectedProvider === "mistral") {
+    const apiKey = process.env.MISTRAL_API_KEY;
+    if (!apiKey) {
+      throw new Error("TÉNGASE PRESENTE: La clave MISTRAL_API_KEY no está configurada en las variables de Vercel.");
+    }
+    const model = process.env.MISTRAL_MODEL || "open-mistral-7b";
+
+    const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: prompt }
+        ],
+        temperature: options.temperature ?? 0.9,
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Mistral AI API falló con código ${response.status}: ${errorText}`);
+    }
+
+    const data: any = await response.json();
+    const text = data.choices?.[0]?.message?.content || "";
+    return { text, sources: [] };
+  }
+
+  throw new Error(`Proveedor de IA no soportado categóricamente: ${provider}`);
+}
+
 // API endpoint to generate a Maslatón tweet on demand
 app.post("/api/gemini/generate-tweet", async (req, res) => {
-  const { category, currentFacts } = req.body;
+  const { category, currentFacts, provider } = req.body;
   try {
     const prompt = `Generame un tweet polémico y espectacular del gran Carlos Maslatón sobre la categoría: "${category}". 
     Incorporá de forma orgánica y delirante el tono maslatoneano y estos hechos/datos de la realidad si están disponibles: ${JSON.stringify(currentFacts)}.
     Recordá mantener el formato corto del tweet, sin hashtags inútiles de IA slop (ej. NO uses #barrani ni #carlos), solo el texto crudo.`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction: CARLOS_SYSTEM_INSTRUCTION,
-        temperature: 0.95,
-      },
-    });
-
-    const tweetText = response.text || "TÉNGASE PRESENTE: Se cayó el sistema de cotización. Procederemos a liquidar todo al portador de forma inmediata. Bullish absoluto.";
-    res.json({ text: tweetText.trim() });
+    const result = await generateWithProvider(provider, prompt, CARLOS_SYSTEM_INSTRUCTION, { temperature: 0.95 });
+    res.json({ text: result.text.trim() });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -141,10 +238,13 @@ app.post("/api/gemini/generate-tweet", async (req, res) => {
 
 // API endpoint to reply to a user tweet as Carlos Maslatón
 app.post("/api/gemini/reply", async (req, res) => {
-  const { originalTweet, replyContext, xLink } = req.body;
+  const { originalTweet, replyContext, xLink, provider } = req.body;
   try {
     let prompt = "";
     let tools: any[] | undefined = undefined;
+
+    // Google search grounding tool only supported natively on Gemini
+    const isGemini = !provider || provider.toLowerCase() === "gemini";
 
     if (xLink && xLink.trim().startsWith("http")) {
       prompt = `El usuario copió este enlace de un post de X (Twitter): "${xLink}".
@@ -152,7 +252,9 @@ app.post("/api/gemini/reply", async (req, res) => {
       Escribí una respuesta asertiva, espectacular y con el estilo inconfundible de Carlos Maslatón.
       Objetivo o alineación deseada de la réplica: "${replyContext || "oponerse ferozmente con análisis técnico"}."
       Tu respuesta debe ser un tuit de respuesta directo y contundente, listo para ser posteado. No incluyas explicaciones sobre la búsqueda, solo el texto crudo del tuit maslatoneano. Sin hashtags inútiles de IA slop (ej. NO uses #carlos).`;
-      tools = [{ googleSearch: {} }];
+      if (isGemini) {
+        tools = [{ googleSearch: {} }];
+      }
     } else {
       prompt = `A Carlos Maslatón le acaban de enviar el siguiente tweet o comentario de un tercero:
       "${originalTweet}"
@@ -162,25 +264,12 @@ app.post("/api/gemini/reply", async (req, res) => {
       Recordá denunciar la 'conducta ho-rro-ro-sa' o celebrar la iniciativa 100% barrani según corresponda.`;
     }
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction: CARLOS_SYSTEM_INSTRUCTION,
-        temperature: 0.9,
-        tools: tools,
-      },
+    const result = await generateWithProvider(provider, prompt, CARLOS_SYSTEM_INSTRUCTION, {
+      temperature: 0.9,
+      tools: tools,
     });
 
-    const replyText = response.text || "Procedo a refutarte con la teoría de ondas de Elliot. Sos un absoluto boludito sin arreglo.";
-    
-    // Extract search citations if grounded
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((chunk: any) => ({
-      title: chunk.web?.title || "Fuente de X",
-      uri: chunk.web?.uri || xLink,
-    })) || [];
-
-    res.json({ text: replyText.trim(), sources });
+    res.json({ text: result.text.trim(), sources: result.sources || [] });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
