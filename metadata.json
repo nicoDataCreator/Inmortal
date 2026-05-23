@@ -1,0 +1,6 @@
+{
+  "name": "Inmortal",
+  "description": "Generador de tweets y respuestas de Carlos Maslatón con datos financieros de Finnhub y eventos espaciales de la NASA en tiempo real.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
