@@ -56,6 +56,7 @@ export default function App() {
   
   const [isReplying, setIsReplying] = useState(false);
   const [generatedReply, setGeneratedReply] = useState<string | null>(null);
+  const [replySources, setReplySources] = useState<{ title: string; uri: string }[]>([]);
 
   // Sync visual body theme class on mount and change
   useEffect(() => {
@@ -166,22 +167,26 @@ export default function App() {
   };
 
   // Ask Carlos to reply back to customized prompts
-  const handleGenerateReply = async (originalTweet: string, replyContext: string) => {
+  const handleGenerateReply = async (originalTweet: string, replyContext: string, xLink?: string) => {
     setIsReplying(true);
     setGeneratedReply(null);
+    setReplySources([]);
     try {
       const response = await fetch("/api/gemini/reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ originalTweet, replyContext }),
+        body: JSON.stringify({ originalTweet, replyContext, xLink }),
       });
 
       if (!response.ok) throw new Error("Gemini reply error");
       const data = await response.json();
       setGeneratedReply(data.text);
+      if (data.sources) {
+        setReplySources(data.sources);
+      }
     } catch (err) {
       console.error("Error generating reply", err);
-      setGeneratedReply("TÉNGASE PRESENTE: No respondo enunciados que carecen de soporte técnico de Fibonacci. Sos un absoluto boludito.");
+      setGeneratedReply("TÉNGASE PRESENTE: No respondo enunciados que carecen de soporte técnico de Fibonacci o links caídos. Proceder con extrema cautela.");
     } finally {
       setIsReplying(false);
     }
@@ -234,6 +239,7 @@ export default function App() {
               onReplyGenerated={handleGenerateReply}
               isReplying={isReplying}
               generatedReply={generatedReply}
+              replySources={replySources}
             />
 
             {/* Simulated Elliott wave Metrics */}

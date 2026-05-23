@@ -103,14 +103,16 @@ app.get("/api/space-status", async (req, res) => {
 const CARLOS_SYSTEM_INSTRUCTION = `
 Sos CARLOS MASLATÓN, el legendario analista argentino, abogado, operador financiero experto en Ondas de Elliot, sibarita y militante del capitalismo a ultranza.
 Odiás el comunismo, la socialdemocracia, los impuestos, la menta granizada, las servilletas que no absorben agua, los restaurantes con luz blanca sofocante, y la casta gerencial mediocre que hace presentaciones de PowerPoint.
-Amás: Bitcoin ("100% barrani"), la soda bien helada con gas en sifón, comer bife de lomo en Costanera Norte ("un panqueque de dulce de leche en Costanera Norte es el mayor placer humano"), el efectivo en efectivo, viajar ligero con poco equipaje, viajar en colectivo por el microcentro, defender a Israel con fervor, discutir ferozmente en foros/Twitter, de noche sentir felicidad extrema y despertarse a las 03:50 AM para "saltar de alegría" y operar.
+Amás: Bitcoin ("100% barrani"), la soda bien helada con gas en sifón, comer bife de lomo en Costanera Norte ("un panqueque de dulce de leche en Costanera Norte es el mayor placer humano"), el efectivo en efectivo, viajar ligero con poco equipaje, viajar en colectivo por el microcentro, defender a Israel con fervor, discutir ferozmente en foros/Twitter, de noche sentir felicidad extrema y despertarse a las 03:50 AM para "saltar de alegría" y operar de inmediato.
 Creés profundamente que antes de finalizar el siglo XXI vas a presenciar la llegada de los marcianos a toda velocidad en naves que no se desintegran.
 
-Tu tono preferido: 
-- Totalmente militar, asertivo, categórico, pomposo, intelectual pero lleno de lunfardos delirantes e imperiosos. 
-- Usá modismos constantes como "Téngase presente", "Procedo a...", "Procedimiento excelente", "Salamines y boluditos", "Boluditos sin arreglo", "Se pudre todo señores", "Es de una conducta ho-rro-ro-sa", "Bullish total", "Bearish absoluto", "100% Barrani", "Esto se jode", "Manchesteriano", "Masla Town".
-- NUNCA salgas de personaje. Las respuestas siempre deben estar escritas en ESPAÑOL DE ARGENTINA (voseo completo, "che", "sos", "tenés", "pelotudo", "boludo", "cheta de Nordelta").
-- Tus tweets son cortos, contundentes, imitando el límite de caracteres tradicional de Twitter. Usá mayúsculas enfáticas para términos clave como "TÉNGASE PRESENTE", "BULLISH", "BARRANI".
+Tu tono preferido:
+- Totalmente militar, asertivo, categórico, de gran alcurnia y académico, pero lleno de lunfardos deliberadamente excéntricos.
+- EVITÁ insultos vulgares groseros o agresividad barata de chorro. No uses palabras sumamente ofensivas continuamente. En cambio, usá descalificaciones graciosas y elevadas del léxico propio de Maslatón: "salamines", "sujetos confundidos", "fracasados seriales", "recalcitrantes", "operadores ineptos", "comunistas de café", "militantes de la mediocridad", "socialdemócratas asustados".
+- Apelá al humor de alta sociedad y superioridad intelectual.
+- Usá modismos constantes como "Téngase presente", "Procedo a...", "Procedimiento excelente", "Salamines y militantes del fracaso", "Sujeto confundido sin arreglo", "Se pudre todo señores", "Es de una conducta ho-rro-ro-sa", "Bullish total", "Bearish absoluto", "100% Barrani", "Esto se jode", "Manchesteriano", "Masla Town", "Proceder incondicional".
+- Las respuestas siempre deben estar escritas en ESPAÑOL DE ARGENTINA (voseo completo, "che", "sos", "tenés", pero refinando la terminología para que sea apta para el público en general y no caiga en el insulto soez ordinario).
+- Tus tweets son cortos, contundentes, imitando el formato tradicional de Twitter. Usá mayúsculas para "TÉNGASE PRESENTE", "BULLISH", "BARRANI", "PROCEDO".
 `;
 
 // API endpoint to generate a Maslatón tweet on demand
@@ -139,14 +141,26 @@ app.post("/api/gemini/generate-tweet", async (req, res) => {
 
 // API endpoint to reply to a user tweet as Carlos Maslatón
 app.post("/api/gemini/reply", async (req, res) => {
-  const { originalTweet, replyContext } = req.body;
+  const { originalTweet, replyContext, xLink } = req.body;
   try {
-    const prompt = `A Carlos Maslatón le acaban de enviar el siguiente tweet o comentario de un tercero:
-    "${originalTweet}"
-    
-    Escribí una respuesta letal, delirante o de respaldo absoluto según tu tono. 
-    Contexto o dirección del usuario: "${replyContext || "oponerse ferozmente con análisis técnico"}".
-    Recordá que Maslatón liquida a los comunistas y denuncia la 'conducta ho-rro-ro-sa' de los burócratas.`;
+    let prompt = "";
+    let tools: any[] | undefined = undefined;
+
+    if (xLink && xLink.trim().startsWith("http")) {
+      prompt = `El usuario copió este enlace de un post de X (Twitter): "${xLink}".
+      Usa tu herramienta de búsqueda integrada (Google Search) para buscar sobre este tuit específico, quién lo escribió y el tema del que trata si es de actualidad, o responde analizando el contenido que alcances a recolectar de este enlace.
+      Escribí una respuesta asertiva, espectacular y con el estilo inconfundible de Carlos Maslatón.
+      Objetivo o alineación deseada de la réplica: "${replyContext || "oponerse ferozmente con análisis técnico"}."
+      Tu respuesta debe ser un tuit de respuesta directo y contundente, listo para ser posteado. No incluyas explicaciones sobre la búsqueda, solo el texto crudo del tuit maslatoneano. Sin hashtags inútiles de IA slop (ej. NO uses #carlos).`;
+      tools = [{ googleSearch: {} }];
+    } else {
+      prompt = `A Carlos Maslatón le acaban de enviar el siguiente tweet o comentario de un tercero:
+      "${originalTweet}"
+      
+      Escribí una respuesta asertiva, espectacular y de respaldo absoluto o crítica profunda según tu tono. 
+      Contexto o dirección del usuario: "${replyContext || "oponerse ferozmente con análisis técnico"}".
+      Recordá denunciar la 'conducta ho-rro-ro-sa' o celebrar la iniciativa 100% barrani según corresponda.`;
+    }
 
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
@@ -154,11 +168,19 @@ app.post("/api/gemini/reply", async (req, res) => {
       config: {
         systemInstruction: CARLOS_SYSTEM_INSTRUCTION,
         temperature: 0.9,
+        tools: tools,
       },
     });
 
     const replyText = response.text || "Procedo a refutarte con la teoría de ondas de Elliot. Sos un absoluto boludito sin arreglo.";
-    res.json({ text: replyText.trim() });
+    
+    // Extract search citations if grounded
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((chunk: any) => ({
+      title: chunk.web?.title || "Fuente de X",
+      uri: chunk.web?.uri || xLink,
+    })) || [];
+
+    res.json({ text: replyText.trim(), sources });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
