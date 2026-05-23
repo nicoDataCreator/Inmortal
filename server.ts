@@ -194,46 +194,68 @@ async function generateWithProvider(
     return await runGemini();
   }
 
-  // 2. OPENROUTER PROVIDER (Soporte Mistral y otros modelos gratis)
+  // 2. OPENROUTER PROVIDER (Soporte Mistral y otros modelos gratis con fallback robusto)
   if (selectedProvider === "openrouter") {
     try {
       const apiKey = process.env.OPENROUTER_API_KEY;
       if (!apiKey) {
         throw new Error("La clave OPENROUTER_API_KEY no está configurada. Operación derivada a Gemini.");
       }
+
+      // Generar lista jerárquica de candidatos a probar
+      const candidates: string[] = [];
+      const customModel = process.env.OPENROUTER_MODEL;
+      if (customModel && customModel.trim() !== "" && customModel.toLowerCase() !== "default") {
+        candidates.push(customModel.trim());
+      }
       
-      // Sanitizar modelos defectuosos como "default" provenientes de variables mal cargadas
-      let model = process.env.OPENROUTER_MODEL || "mistralai/mistral-7b-instruct:free";
-      if (!model || model.trim() === "" || model.toLowerCase() === "default") {
-        model = "mistralai/mistral-7b-instruct:free";
+      // Candidatos modernos, funcionales y gratuitos
+      candidates.push("google/gemma-2-9b-it:free");
+      candidates.push("meta-llama/llama-3-8b-instruct:free");
+      candidates.push("qwen/qwen-2.5-72b-instruct:free");
+      candidates.push("mistralai/mistral-7b-instruct:free");
+
+      let lastErrorText = "";
+      for (const model of candidates) {
+        try {
+          console.log(`[OpenRouter Siguiente Candidato] Intentando comunicar con modelo: ${model}`);
+          const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`,
+              "HTTP-Referer": "https://maslaton-app.vercel.app",
+              "X-Title": "Masla Town Simulator",
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                { role: "system", content: systemInstruction },
+                { role: "user", content: prompt }
+              ],
+              temperature: options.temperature ?? 0.9,
+            })
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            lastErrorText = `Modelo ${model} falló con estado ${response.status}: ${errorText}`;
+            console.warn(`[OpenRouter Warning] ${lastErrorText}`);
+            continue; // Prueba el siguiente candidato
+          }
+
+          const data: any = await response.json();
+          const text = data.choices?.[0]?.message?.content;
+          if (text) {
+            return { text, sources: [] };
+          }
+        } catch (singleModelErr: any) {
+          lastErrorText = `Error al invocar ${model}: ${singleModelErr.message}`;
+          console.warn(`[OpenRouter Warning Exception] ${lastErrorText}`);
+        }
       }
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-          "HTTP-Referer": "https://maslaton-app.vercel.app",
-          "X-Title": "Masla Town Simulator",
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemInstruction },
-            { role: "user", content: prompt }
-          ],
-          temperature: options.temperature ?? 0.9,
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`OpenRouter falló (${response.status}): ${errorText}`);
-      }
-
-      const data: any = await response.json();
-      const text = data.choices?.[0]?.message?.content || "";
-      return { text, sources: [] };
+      throw new Error(`Ningún modelo de OpenRouter respondió exitosamente. Último error reportado: ${lastErrorText}`);
     } catch (err: any) {
       console.warn(`[OpenRouter Fallback Alert] ${err.message}. Derivando procedimiento soberano a Gemini de inmediato.`);
       // Sifón helado y bife de lomo: procedemos con el predeterminado
@@ -241,46 +263,65 @@ async function generateWithProvider(
     }
   }
 
-  // 3. MISTRAL AI PROVIDER
+  // 3. MISTRAL AI PROVIDER con fallback robusto
   if (selectedProvider === "mistral") {
     try {
       const apiKey = process.env.MISTRAL_API_KEY;
       if (!apiKey) {
         throw new Error("La clave MISTRAL_API_KEY no está configurada. Operación derivada a Gemini.");
       }
+
+      // Generar lista jerárquica de candidatos a probar
+      const candidates: string[] = [];
+      const customModel = process.env.MISTRAL_MODEL;
+      if (customModel && customModel.trim() !== "" && customModel.toLowerCase() !== "studio" && customModel.toLowerCase() !== "default") {
+        candidates.push(customModel.trim());
+      }
       
-      // Sanitizar modelos defectuosos como "Studio" o "default" provenientes de configuraciones erróneas
-      let model = process.env.MISTRAL_MODEL || "open-mistral-7b";
-      if (!model || model.trim() === "" || model.toLowerCase() === "studio" || model.toLowerCase() === "default") {
-        model = "open-mistral-7b";
+      candidates.push("open-mistral-7b");
+      candidates.push("mistral-tiny");
+      candidates.push("mistral-small-latest");
+
+      let lastErrorText = "";
+      for (const model of candidates) {
+        try {
+          const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                { role: "system", content: systemInstruction },
+                { role: "user", content: prompt }
+              ],
+              temperature: options.temperature ?? 0.9,
+            })
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            lastErrorText = `Modelo Mistral ${model} falló con estado ${response.status}: ${errorText}`;
+            console.warn(`[Mistral Warning] ${lastErrorText}`);
+            continue;
+          }
+
+          const data: any = await response.json();
+          const text = data.choices?.[0]?.message?.content;
+          if (text) {
+            return { text, sources: [] };
+          }
+        } catch (singleModelErr: any) {
+          lastErrorText = `Error al invocar Mistral ${model}: ${singleModelErr.message}`;
+          console.warn(`[Mistral Warning Exception] ${lastErrorText}`);
+        }
       }
 
-      const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemInstruction },
-            { role: "user", content: prompt }
-          ],
-          temperature: options.temperature ?? 0.9,
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Mistral falló (${response.status}): ${errorText}`);
-      }
-
-      const data: any = await response.json();
-      const text = data.choices?.[0]?.message?.content || "";
-      return { text, sources: [] };
+      throw new Error(`Ningún modelo de Mistral respondió exitosamente. Último error reportado: ${lastErrorText}`);
     } catch (err: any) {
-      console.warn(`[Mistral Fallback Alert] ${err.message}. Derivando procedimiento soberano a Gemini de de inmediato.`);
+      console.warn(`[Mistral Fallback Alert] ${err.message}. Derivando procedimiento soberano a Gemini de inmediato.`);
       return await runGemini();
     }
   }
