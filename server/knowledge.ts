@@ -15,7 +15,7 @@ export const INITIAL_KNOWLEDGE: KnowledgeEntry[] = [
     id: "kb-1",
     category: "Elliot Waves & Mercados",
     concept: "La Subonda 3 Súper Impulsiva",
-    quote_or_fact: "La Subonda 3 de una tendencia alalza es la fase más destructiva de osos, de mayor acumulación de capital y donde se consolida la riqueza soberana incondicional.",
+    quote_or_fact: "La Subonda 3 de una tendencia al alza es la fase más destructiva de osos, de mayor acumulación de capital y donde se consolida la riqueza soberana incondicional.",
     historical_context: "Análisis técnico de Ondas de Elliott aplicado al bull market argentino y criptográfico.",
     created_at: new Date().toISOString()
   },
@@ -37,58 +37,122 @@ export const INITIAL_KNOWLEDGE: KnowledgeEntry[] = [
   },
   {
     id: "kb-4",
-    category: "100% Barrani & Efis",
-    concept: "Repudio al Dinero Fiduciario",
-    quote_or_fact: "Todo billete emitido por bancos centrales sin respaldo real es una estafa inflacionaria directa del estatismo, diseñada expresamente para expropiar los ahorros honestos.",
-    historical_context: "Manchesterianismo puro e incondicional frente al monopolio emisor de moneda.",
+    category: "Personal & Filosofía",
+    concept: "Ladrillazos al Cerebro",
+    quote_or_fact: "No se puede perder el tiempo en la vida leyendo libros, verdaderos ladrillazos al cerebro que dañan la formación de cualquier joven. Celebro que Twitter haya reventado a todos los autodenominados intelectuales que pretendieron adueñarse de la realidad.",
+    historical_context: "Doctrina mítica contra la vanidad académica e intelectual desvinculada del mercado práctico.",
     created_at: new Date().toISOString()
   },
   {
     id: "kb-5",
-    category: "Marcianos & Marte",
-    concept: "Llegada Inminente Extraterrestre",
-    quote_or_fact: "Téngase presente: antes de finalizar el siglo XXI, vamos a presenciar la llegada de los marcianos a toda velocidad en naves espaciales que resisten el ingreso a la atmósfera sin desintegrarse.",
-    historical_context: "Hipótesis cósmica de Carlos sobre el contacto inminente de civilizaciones avanzadas.",
+    category: "Personal & Filosofía",
+    concept: "Destrucción de Libros",
+    quote_or_fact: "En mi caso, respecto de los libros de papel que he leído en mi vida, no doblo sus hojas, ni los marco con lápiz o birome. Los iba procesando de a poco, o sea: leía capítulos enteros, los separaba del principal, y destruía sus hojas o las quemaba hasta que no quedaran rastros.",
+    historical_context: "Hábito radical de asimilación intelectual de Carlos expuesto en su libro.",
     created_at: new Date().toISOString()
   },
   {
     id: "kb-6",
-    category: "Marcianos & Marte",
-    concept: "Marte Estacionario Retrogrado",
-    quote_or_fact: "Cuando Marte entra en fase estacionaria o inicia retrogradación astral, distorsiona gravemente la psicología colectiva de los mercados financieros y altera las decisiones de los operadores.",
-    historical_context: "Astrología bursátil no declarada de Maslatón sobre el comportamiento financiero.",
+    category: "Personal & Filosofía",
+    concept: "La UBA: la mejor universidad del mundo",
+    quote_or_fact: "La UBA no es la mejor universidad de Iberoamérica sino del mundo. Hay cinco razones fundamentales para mí: 1) hay mucha gente habitándola a toda hora; 2) se puede hacer kilombo y todo bien; 3) es una escuela para la vida y la política; 4) es muy divertida; 5) las minas que van son espectaculares.",
+    historical_context: "Ferviente defensa maslatoniana a la universidad pública estatal frente a las privadas.",
     created_at: new Date().toISOString()
   },
   {
     id: "kb-7",
-    category: "Anti-Comunismo & Casta",
-    concept: "Aborrecimiento de los Burócratas",
-    quote_or_fact: "La burocracia estatal y la casta gerencial improductiva son parásitos históricos que asfixian el surgimiento de valor real con regulaciones absurdas y planificaciones de escritorio.",
-    historical_context: "Crítica visceral contra el intervencionismo de planificación central.",
+    category: "Personal & Filosofía",
+    concept: "Técnica de Bañado Definitiva",
+    quote_or_fact: "Se me ha preguntado decenas de veces cuál es la técnica de bañado personal que utilizo: 1) Mojada general del cuerpo por 40 segundos. 2) Primera enjabonada general, con jabón blanco en pan, raspando la cabeza con las uñas. 3) Primera enjuagada rápida. 4) Segunda enjabonada general, bien fuerte. 5) Enjuagada fina. Por lo tanto: cero desodorante y cero perfume, el cuerpo ya ha quedado limpísimo.",
+    historical_context: "Riguroso protocolo de higiene extraído de su capítulo de Usos y Costumbres.",
     created_at: new Date().toISOString()
   },
   {
     id: "kb-8",
-    category: "Anti-Comunismo & Casta",
-    concept: "La Casta de PowerPoint",
-    quote_or_fact: "Los graduados con títulos corporativos de consultoría e ingenieros de PowerPoint destruyen las empresas por su total e irreversible desconexión del olfato comercial práctico.",
-    historical_context: "Denuncia humorística y académica contra la tecnocracia corporativa moderna.",
+    category: "Soda & Costanera",
+    concept: "La soda destructora de sifón",
+    quote_or_fact: "La soda de sifón con gas destructor, recontra helada, es indispensable para acompañar cualquier plato. Pedir agua mineral con gas es una mariconada típica que los mozos de perfil colectivista te quieren encajar.",
+    historical_context: "Filosofía culinaria nacional y defensa mítica de la mesa tradicional argentina.",
     created_at: new Date().toISOString()
   },
   {
     id: "kb-9",
-    category: "Soda & Costanera",
-    concept: "El Bife de Lomo Soberano",
-    quote_or_fact: "Un lomo de ternera premium jugoso en los carritos de Costanera Norte, acompañado incondicionalmente de soda helada de sifón con gas destructor, es el mayor milagro culinario que existe.",
-    historical_context: "El ritual gastronómico maslatoniano clásico de disfrute urbano.",
+    category: "Anti-Comunismo & Casta",
+    concept: "La nefasta casta de gerentes de PowerPoint",
+    quote_or_fact: "Los gerentes corporativos de recursos humanos no hacen ni dejan hacer. Temen que queden expuestas su inutilidad cerebral y su vagancia psicomotriz de origen, que vuelcan en 'PowerPoints' para impresionar, pero que no sirven para nada.",
+    historical_context: "Crítica maslatoniana definitiva contra la tecnocracia gerencial moderna.",
     created_at: new Date().toISOString()
   },
   {
     id: "kb-10",
+    category: "100% Barrani & Efis",
+    concept: "No estudiar economía en universidades",
+    quote_or_fact: "Aclaro que nunca estudié economía ni finanzas en ninguna parte del mundo. No estoy para ir a escuchar pelotudeces a la universidad. Soy meramente un hombre del mercado y un judío especulador del estrato más bajo de la sociedad. Soy el capitalismo.",
+    historical_context: "Doctrina mítica de Carlos sobre su origen puramente empírico y bursátil.",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "kb-11",
+    category: "Personal & Filosofía",
+    concept: "Sábanas I: Gente socialdemócrata",
+    quote_or_fact: "¿Ustedes duermen en sus camas con las sábanas, frazadas y acolchados sueltos de tal manera de maniobrarlos a voluntad durante la noche? La cama liberada es un síntoma de liberalismo político y económico. La sábana pegada es de gente socialdemócrata que no sabe lo que quiere.",
+    historical_context: "Análisis conceptual del sueño libre expuesto en 'Téngase Presente'.",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "kb-12",
     category: "Soda & Costanera",
-    concept: "La Servilleta Inútil de Plástico",
-    quote_or_fact: "Las servilletas satinadas que no absorben agua sino que la esparcen sobre la cara son un atentado ho-rro-ro-so contra el comensal. Su proliferación en establecimientos es una conducta delictiva.",
-    historical_context: "Queja mítica de Carlos sobre el diseño irracional de insumos de hostelería.",
+    concept: "El peor café del mundo",
+    quote_or_fact: "El café que se sirve en la Argentina no es tan solo malo, es directamente el peor del mundo. No hay ningún otro país con un café tan horrible, inclusive las cadenas internacionales Starbucks son incapaces de reproducir aquí las calidades básicas. Sin duda, la falla es humana.",
+    historical_context: "Observación urbana inapelable sobre la gastronomía nacional.",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "kb-13",
+    category: "Anti-Comunismo & Casta",
+    concept: "Sintonizar al enemigo (Radio Pekín)",
+    quote_or_fact: "El comunismo ha sido un desastre con la represión y la muerte. Pero para definir al enemigo hay que conocerlo. Corría 1973 y yo escuchaba con devoción Radio Pekín en idioma español sintonizando ondas cortas. Me enviaban kilos de folletería del X Congreso del Partido Comunista de China.",
+    historical_context: "Memorias de su juventud como radioescucha y corresponsal por correspondencia.",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "kb-14",
+    category: "Personal & Filosofía",
+    concept: "No busco amigos sino enemigos",
+    quote_or_fact: "Téngase presente. No busco sumar amigos sino enemigos. Más enemigos, mejor todavía. Mi madre nunca lo entendió y estuvo por años horrorizada por mi permanente búsqueda de conflicto. Cuanta más gente en contra tenga, mejor me siento en la vida. Soy indestructible, invencible e inmortal.",
+    historical_context: "Declaraciones de principios vitales e incondicionales del maestro.",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "kb-15",
+    category: "Personal & Filosofía",
+    concept: "O hacés diez cosas al mismo tiempo, o te morís",
+    quote_or_fact: "Desde chico estoy diseñado para hacer muchas cosas diferentes al mismo tiempo. La hipercomunicación del siglo XXI no me sorprendió ni me desequilibró. O hacés diez cosas al mismo tiempo, o te morís. No hay término medio.",
+    historical_context: "Máxima maslatoniana sobre la intensidad vital requerida para operar en el siglo XXI.",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "kb-16",
+    category: "100% Barrani & Efis",
+    concept: "Mandarinas: una tremenda desgracia",
+    quote_or_fact: "Detesto la mandarina y a todos los consumidores de mandarina, son todos una manga de roñosos. Mi esposa se ha convertido, desgraciadamente, en contraposición a mi discurso público, en una mandarinera que deja la casa impregnada con ese olor a fermento podrido insoportable.",
+    historical_context: "Queja mítica hogareña extraída de las páginas de su libro.",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "kb-17",
+    category: "Elliot Waves & Mercados",
+    concept: "Los 55 años de Fibonacci en el Bear Market",
+    quote_or_fact: "Estructura Técnica del Gran Bear Market Argentino: 55 años de Fibonacci en conteo cíclico de la historia nacional desde la Noche de los Bastones Largos en julio de 1966. El mercado de acciones es incondicionalmente Bullish por razones técnicas.",
+    historical_context: "Vaticinio exacto formulado por Maslatón antes del despegue bursátil argentino.",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "kb-18",
+    category: "Personal & Filosofía",
+    concept: "El órgano sexual por excelencia",
+    quote_or_fact: "Téngase presente. El órgano sexual masculino por excelencia no se denomina 'pito', como escriben algunos desubicados o desubicadas que la van de finos o de finas. Los nombres correctos son: 'pija', 'poronga' o 'janune'.",
+    historical_context: "Doctrina de precisión lingüística y moral de Carlos expuesta en su libro.",
     created_at: new Date().toISOString()
   }
 ];
@@ -226,6 +290,11 @@ CREATE TABLE IF NOT EXISTS carlos_book_knowledge (
 -- Habilitar acceso de lectura/escritura público (o configurar políticas RLS para lectura pública y escritura anon)
 ALTER TABLE carlos_book_knowledge ENABLE ROW LEVEL SECURITY;
 
+-- Limpiar políticas viejas si se vuelven a crear
+DROP POLICY IF EXISTS "Lectura pública de doctrinas" ON carlos_book_knowledge;
+DROP POLICY IF EXISTS "Inserción pública de doctrinas" ON carlos_book_knowledge;
+DROP POLICY IF EXISTS "Borrado público de doctrinas" ON carlos_book_knowledge;
+
 CREATE POLICY "Lectura pública de doctrinas" 
 ON carlos_book_knowledge FOR SELECT 
 USING (true);
@@ -237,5 +306,45 @@ WITH CHECK (true);
 CREATE POLICY "Borrado público de doctrinas" 
 ON carlos_book_knowledge FOR DELETE 
 USING (true);
+
+-- ALIMENTAR SEED DATA: 18 doctrinas extraídas del PDF original de Carlos Maslatón "Téngase Presente":
+INSERT INTO carlos_book_knowledge (category, concept, quote_or_fact, historical_context) 
+VALUES
+('Elliot Waves & Mercados', 'La Subonda 3 Súper Impulsiva', 'La Subonda 3 de una tendencia al alza es la fase más destructiva de osos, de mayor acumulación de capital y donde se consolida la riqueza soberana incondicional.', 'Análisis técnico de Ondas de Elliott aplicado al bull market argentino y criptográfico.'),
+
+('Elliot Waves & Mercados', 'La capitulación de los osos', 'Los mercados tocan su piso definitivo de cotización cuando el pesimismo de los militantes del PowerPoint es absoluto y deciden liquidar sus posiciones asustados.', 'Fundamentos psicológicos de la Teoría de Ondas sobre la capitulación especulativa.'),
+
+('100% Barrani & Efis', 'Apología del Dinero Barrani', 'La transacción en efectivo físico, en negro, eludiendo impuestos abusivos del Estado, es el acto de resistencia individual y libertad capitalista más puro de la civilización.', 'Manifiesto contra la hiper-regulación estatal y afición por el circuito informal legítimo.'),
+
+('Personal & Filosofía', 'Ladrillazos al Cerebro', 'No se puede perder el tiempo en la vida leyendo libros, verdaderos ladrillazos al cerebro que dañan la formación de cualquier joven. Celebro que Twitter haya reventado a todos los autodenominados intelectuales que pretendieron adueñarse de la realidad.', 'Doctrina mítica contra la vanidad académica e intelectual desvinculada del mercado práctico.'),
+
+('Personal & Filosofía', 'Destrucción de Libros', 'En mi caso, respecto de los libros de papel que he leído en mi vida, no doblo sus hojas, ni los marco con lápiz o birome. Los iba procesando de a poco, o sea: leía capítulos enteros, los separaba del principal, y destruía sus hojas o las quemaba hasta que no quedaran rastros.', 'Hábito radical de asimilación intelectual de Carlos expuesto en su libro.'),
+
+('Personal & Filosofía', 'La UBA: la mejor universidad del mundo', 'La UBA no es la mejor universidad de Iberoamérica sino del mundo. Hay cinco razones fundamentales para mí: 1) hay mucha gente habitándola a toda hora; 2) se puede hacer kilombo y todo bien; 3) es una escuela para la vida y la política; 4) es muy divertida; 5) las minas que van son espectaculares.', 'Ferviente defensa maslatoniana a la universidad pública estatal frente a las privadas.'),
+
+('Personal & Filosofía', 'Técnica de Bañado Definitiva', 'Se me ha preguntado decenas de veces cuál es la técnica de bañado personal que utilizo: 1) Mojada general del cuerpo por 40 segundos. 2) Primera enjabonada general, con jabón blanco en pan, raspando la cabeza con las uñas. 3) Primera enjuagada rápida. 4) Segunda enjabonada general, bien fuerte. 5) Enjuagada fina. Por lo tanto: cero desodorante y cero perfume, el cuerpo ya ha quedado limpísimo.', 'Riguroso protocolo de higiene extraído de su capítulo de Usos y Costumbres.'),
+
+('Soda & Costanera', 'La soda destructora de sifón', 'La soda de sifón con gas destructor, recontra helada, es indispensable para acompañar cualquier plato. Pedir agua mineral con gas es una mariconada típica que los mozos de perfil colectivista te quieren encajar.', 'Filosofía culinaria nacional y defensa mítica de la mesa tradicional argentina.'),
+
+('Anti-Comunismo & Casta', 'La nefasta casta de gerentes de PowerPoint', 'Los gerentes corporativos de recursos humanos no hacen ni dejan hacer. Temen que queden expuestas su inutilidad cerebral y su vagancia psicomotriz de origen, que vuelcan en ''PowerPoints'' para impresionar, pero que no sirven para nada.', 'Crítica maslatoniana definitiva contra la tecnocracia gerencial moderna.'),
+
+('100% Barrani & Efis', 'No estudiar economía en universidades', 'Aclaro que nunca estudié economía ni finanzas en ninguna parte del mundo. No estoy para ir a escuchar pelotudeces a la universidad. Soy meramente un hombre del mercado y un judío especulador del estrato más bajo de la sociedad. Soy el capitalismo.', 'Doctrina mítica de Carlos sobre su origen puramente empírico y bursátil.'),
+
+('Personal & Filosofía', 'Sábanas I: Gente socialdemócrata', '¿Ustedes duermen en sus camas con las sábanas, frazadas y acolchados sueltos de tal manera de maniobrarlos a voluntad durante la noche? La cama liberada es un síntoma de liberalismo político y económico. La sábana pegada es de gente socialdemócrata que no sabe lo que quiere.', 'Análisis conceptual del sueño libre expuesto en ''Téngase Presente''.'),
+
+('Soda & Costanera', 'El peor café del mundo', 'El café que se sirve en la Argentina no es tan solo malo, es directamente el peor del mundo. No hay ningún otro país con un café tan horrible, inclusive las cadenas internacionales Starbucks son incapaces de reproducir aquí las calidades básicas. Sin duda, la falla es humana.', 'Observación urbana inapelable sobre la gastronomía nacional.'),
+
+('Anti-Comunismo & Casta', 'Sintonizar al enemigo (Radio Pekín)', 'El comunismo ha sido un desastre con la represión y la muerte. Pero para definir al enemigo hay que conocerlo. Corría 1973 y yo escuchaba con devoción Radio Pekín en idioma español sintonizando ondas cortas. Me enviaban kilos de folletería del X Congreso del Partido Comunista de China.', 'Memorias de su juventud como radioescucha y corresponsal por correspondencia.'),
+
+('Personal & Filosofía', 'No busco amigos sino enemigos', 'Téngase presente. No busco sumar amigos sino enemigos. Más enemigos, mejor todavía. Mi madre nunca lo entendió y estuvo por años horrorizada por mi permanente búsqueda de conflicto. Cuanta más gente en contra tenga, mejor me siento en la vida. Soy indestructible, invencible e inmortal.', 'Declaraciones de principios vitales e incondicionales del maestro.'),
+
+('Personal & Filosofía', 'O hacés diez cosas al mismo tiempo, o te morís', 'Desde chico estoy diseñado para hacer muchas cosas diferentes al mismo tiempo. La hipercomunicación del siglo XXI no me sorprendió ni me desequilibró. O hacés diez cosas al mismo tiempo, o te morís. No hay término medio.', 'Máxima maslatoniana sobre la intensidad vital requerida para operar en el siglo XXI.'),
+
+('100% Barrani & Efis', 'Mandarinas: una tremenda desgracia', 'Detesto la mandarina y a todos los consumidores de mandarina, son todos una manga de roñosos. Mi esposa se ha convertido, desgraciadamente, en contraposición a mi discurso público, en una mandarinera que deja la casa impregnada con ese olor a fermento podrido insoportable.', 'Queja mítica hogareña extraída de las páginas de su libro.'),
+
+('Elliot Waves & Mercados', 'Los 55 años de Fibonacci en el Bear Market', 'Estructura Técnica del Gran Bear Market Argentino: 55 años de Fibonacci en conteo cíclico de la historia nacional desde la Noche de los Bastones Largos en julio de 1966. El mercado de acciones es incondicionalmente Bullish por razones técnicas.', 'Vaticinio exacto formulado por Maslatón antes del despegue bursátil argentino.'),
+
+('Personal & Filosofía', 'El órgano sexual por excelencia', 'Téngase presente. El órgano sexual masculino por excelencia no se denomina ''pito'', como escriben algunos desubicados o desubicadas que la van de finos o de finas. Los nombres correctos son: ''pija'', ''poronga'' o ''janune''.', 'Doctrina de precisión lingüística y moral de Carlos expuesta en su libro.')
+ON CONFLICT DO NOTHING;
   `.trim();
 }
